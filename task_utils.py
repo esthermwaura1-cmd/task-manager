@@ -9,9 +9,10 @@ def add_task(tasks, title, description, due_date):
     is_valid, msg = validate_task_name(title)
     if not is_valid:
         return msg
-    is_valid, msg = validate_task_description(description)
-    if not is_valid:
-        return msg
+    try:
+        validate_task_description(description)
+    except ValueError as exc:
+        return str(exc)
 
     title = title.strip()
     description = description.strip()

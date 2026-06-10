@@ -39,9 +39,9 @@ def validate_task(description):
         ValueError: If description is not a string or exceeds 500 characters.
     """
     if not isinstance(description, str):
-        return False, "Description must be a string."
+        raise ValueError("Description must be a string.")
 
     if len(description) > 500:
-        return False, "Description must be 500 characters or fewer."
+        raise ValueError("Description must be 500 characters or fewer.")
 
-    return True, "Valid."
+    return True

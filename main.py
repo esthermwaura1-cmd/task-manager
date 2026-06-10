@@ -4,7 +4,63 @@ main.py
 Task Management System - CLI using separated modules.
 """
 
-from task_utils import add_task, complete_task, get_pending_tasks, calculate_progress
+import os
+import sys
+
+try:
+    from task_utils import add_task, complete_task, get_pending_tasks, calculate_progress
+except ModuleNotFoundError:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        from task_utils import add_task, complete_task, get_pending_tasks, calculate_progress
+    except ModuleNotFoundError:
+        def add_task(tasks, title, description, due_date):
+            from validation import validate_task_name, validate_task as validate_task_description
+
+            is_valid, msg = validate_task_name(title)
+            if not is_valid:
+                return msg
+            validate_task_description(description)
+
+            title = title.strip()
+            description = description.strip()
+            due_date = due_date.strip() if isinstance(due_date, str) else str(due_date)
+
+            new_id = max((task.get("id", 0) for task in tasks), default=0) + 1
+            task = {
+                "id": new_id,
+                "title": title,
+                "description": description,
+                "due_date": due_date,
+                "completed": False,
+            }
+            tasks.append(task)
+            return "Task added successfully!"
+
+        def complete_task(tasks, task_id):
+            from validation import validate_task_id
+
+            is_valid, msg = validate_task_id(task_id, tasks)
+            if not is_valid:
+                return msg
+            task_id = int(task_id)
+            for task in tasks:
+                if task.get("id") == task_id:
+                    if task.get("completed"):
+                        return "Task already completed."
+                    task["completed"] = True
+                    return "Task marked as complete!"
+            return "Task not found."
+
+        def get_pending_tasks(tasks):
+            return [task for task in tasks if not task.get("completed")]
+
+        def calculate_progress(tasks):
+            total = len(tasks)
+            if total == 0:
+                return 0.0
+            completed = sum(1 for task in tasks if task.get("completed"))
+            return (completed / total) * 100
 
 
 def display_menu():
